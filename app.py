@@ -3,50 +3,80 @@ import pandas as pd
 
 st.set_page_config(page_title="SynerG Builds", page_icon="⚡", layout="wide")
 
-# --- HIER SIND DIE DATEN DIREKT IM CODE (FALLBACK) ---
-# Das garantiert, dass es funktioniert, egal was mit der CSV ist.
+# --- TEST-DATEN MIT WIKIMEDIA (Blockier-Sicher) ---
 data = [
-    {"typ": "cpu", "modell": "Intel Core i3-12100F", "score": 14000, "preis": 95, "link": "https://amzn.to/3S8q", "bild_url": "https://m.media-amazon.com/images/I/51KoDnSuCbL._AC_SL1000_.jpg"},
-    {"typ": "cpu", "modell": "Intel Core i5-13600K", "score": 38000, "preis": 320, "link": "https://amzn.to/3S8q", "bild_url": "https://m.media-amazon.com/images/I/6125mFrzr6L._AC_SL1000_.jpg"},
-    {"typ": "cpu", "modell": "AMD Ryzen 5 5600",    "score": 22000, "preis": 130, "link": "https://amzn.to/3S8q", "bild_url": "https://m.media-amazon.com/images/I/61+48002TLL._AC_SL1000_.jpg"},
-    {"typ": "cpu", "modell": "AMD Ryzen 7 7800X3D", "score": 45000, "preis": 380, "link": "https://amzn.to/3S8q", "bild_url": "https://m.media-amazon.com/images/I/51msA+a+jBL._AC_SL1000_.jpg"},
-    {"typ": "gpu", "modell": "NVIDIA RTX 3060",     "score": 17000, "preis": 280, "link": "https://amzn.to/3S8q", "bild_url": "https://m.media-amazon.com/images/I/71M51M81cEL._AC_SL1500_.jpg"},
-    {"typ": "gpu", "modell": "NVIDIA RTX 4060 Ti",  "score": 22000, "preis": 390, "link": "https://amzn.to/3S8q", "bild_url": "https://m.media-amazon.com/images/I/71w-75L3S0L._AC_SL1500_.jpg"},
-    {"typ": "gpu", "modell": "AMD Radeon RX 7600",  "score": 19000, "preis": 270, "link": "https://amzn.to/3S8q", "bild_url": "https://m.media-amazon.com/images/I/71+vL+2k6gL._AC_SL1500_.jpg"},
+    {
+        "typ": "cpu", 
+        "modell": "Intel Core i5-13600K", 
+        "score": 38000, 
+        "preis": 320, 
+        "link": "https://amzn.to/3S8q", 
+        # Offizielles Intel Logo von Wikimedia (Public Domain)
+        "bild_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Intel-logo.svg/800px-Intel-logo.svg.png"
+    },
+    {
+        "typ": "cpu", 
+        "modell": "AMD Ryzen 7 7800X3D", 
+        "score": 45000, 
+        "preis": 380, 
+        "link": "https://amzn.to/3S8q", 
+        # Offizielles AMD Logo
+        "bild_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/AMD_Logo.svg/800px-AMD_Logo.svg.png"
+    },
+    {
+        "typ": "gpu", 
+        "modell": "NVIDIA RTX 4070", 
+        "score": 30000, 
+        "preis": 550, 
+        "link": "https://amzn.to/3S8q", 
+        # Nvidia Logo
+        "bild_url": "https://upload.wikimedia.org/wikipedia/de/thumb/2/21/Nvidia_logo.svg/1200px-Nvidia_logo.svg.png"
+    },
+    {
+        "typ": "gpu", 
+        "modell": "AMD Radeon RX 7800 XT", 
+        "score": 32000, 
+        "preis": 530, 
+        "link": "https://amzn.to/3S8q", 
+        # Radeon Logo
+        "bild_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Radeon_logo.svg/2560px-Radeon_logo.svg.png"
+    }
 ]
 
 df = pd.DataFrame(data)
-# -----------------------------------------------------
 
-st.title("⚡ SynerG Builds (Test-Modus)")
-st.caption("Lädt Daten direkt aus dem Code, um CSV-Fehler auszuschließen.")
+# --- APP ---
+st.title("⚡ SynerG Builds")
+st.write("Test-Modus: Wir nutzen Wikipedia-Bilder, um Blockaden zu vermeiden.")
 st.divider()
 
-# Setup Sidebar
 with st.sidebar:
-    st.header("⚙️ Setup")
+    st.header("Setup")
+    # Filter für CPU/GPU
     cpus = df[df['typ'] == 'cpu']
     gpus = df[df['typ'] == 'gpu']
-    selected_cpu = st.selectbox("CPU", cpus['modell'])
-    selected_gpu = st.selectbox("GPU", gpus['modell'])
-    resolution = st.select_slider("Auflösung", options=["1080p", "1440p", "4K"], value="1440p")
+    
+    selected_cpu_name = st.selectbox("CPU", cpus['modell'])
+    selected_gpu_name = st.selectbox("GPU", gpus['modell'])
 
-# Daten holen
-cpu_row = cpus[cpus['modell'] == selected_cpu].iloc[0]
-gpu_row = gpus[gpus['modell'] == selected_gpu].iloc[0]
+# Daten der Auswahl finden
+cpu_row = cpus[cpus['modell'] == selected_cpu_name].iloc[0]
+gpu_row = gpus[gpus['modell'] == selected_gpu_name].iloc[0]
 
-# Anzeige
 col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("CPU")
-    # Wir nutzen hier den sichersten Weg für Bilder
+    # Hier muss das Bild jetzt bleiben!
     st.image(cpu_row['bild_url'], width=200)
+    st.markdown(f"**{cpu_row['modell']}**")
     st.metric("Score", cpu_row['score'])
-    st.write(f"**{cpu_row['modell']}**")
 
 with col2:
     st.subheader("GPU")
+    # Hier auch!
     st.image(gpu_row['bild_url'], width=200)
+    st.markdown(f"**{gpu_row['modell']}**")
     st.metric("Score", gpu_row['score'])
-    st.write(f"**{gpu_row['modell']}**")
+
+st.success("Wenn du die Logos siehst, funktioniert deine App perfekt!")
