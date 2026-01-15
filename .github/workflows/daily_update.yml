@@ -1,1 +1,35 @@
+name: Daily Data Update
 
+# Wann soll es laufen?
+on:
+  schedule:
+    - cron: '0 4 * * *' # Jeden Tag um 04:00 Uhr UTC (ca. 05:00/06:00 Uhr in DE)
+  workflow_dispatch: # Erlaubt dir, es auch manuell per Klick zu starten
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code auschecken (Repo laden)
+        uses: actions/checkout@v3
+
+      - name: Python einrichten
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Abhängigkeiten installieren
+        run: |
+          pip install pandas
+
+      - name: Update-Skript ausführen
+        run: python update_data.py
+
+      - name: Änderungen speichern (Commit & Push)
+        run: |
+          git config --global user.name 'SynerG Bot'
+          git config --global user.email 'bot@synergbuilds.com'
+          git add hardware_data.csv
+          git commit -m "Automatisches Update der Preise/Daten" || exit 0
+          git push
