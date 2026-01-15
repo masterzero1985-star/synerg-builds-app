@@ -72,3 +72,9 @@ elif cpu_score > target_cpu * 2.5:
     st.warning("⚠️ GPU Bottleneck (CPU ist sehr stark, Grafikkarte limitiert).")
 else:
     st.success("✅ Perfekte Synergie! Passt super zusammen.")
+
+
+# --- FOOTER / RECHTLICHES ---
+st.write("---")
+st.caption("Hinweis: Bei den verlinkten Buttons handelt es sich um Affiliate-Links. Wenn du darüber kaufst, erhalten wir eine kleine Provision. Für dich ändert sich der Preis nicht.")
+st.caption("Impressum & Datenschutz: [Hier Link zu deinem Impressum einfügen]")
