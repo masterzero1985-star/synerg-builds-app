@@ -7,6 +7,7 @@ st.set_page_config(page_title="SynerG Builds", page_icon="⚡")
 # Daten laden
 @st.cache_data
 def load_data():
+    # Wir lesen jetzt auch die 'link' Spalte mit ein
     df = pd.read_csv("hardware_data.csv")
     return df
 
@@ -31,19 +32,39 @@ with st.sidebar:
 st.title("⚡ SynerG Builds")
 st.write("Checke deine Hardware auf Bottlenecks.")
 
-# Werte holen
-cpu_score = cpus[cpus['modell'] == selected_cpu]['score'].values[0]
-gpu_score = gpus[gpus['modell'] == selected_gpu]['score'].values[0]
+# Werte UND LINKS holen
+cpu_row = cpus[cpus['modell'] == selected_cpu].iloc[0]
+gpu_row = gpus[gpus['modell'] == selected_gpu].iloc[0]
 
-# Berechnung (Vereinfachter Algorithmus)
+cpu_score = cpu_row['score']
+gpu_score = gpu_row['score']
+
+# Hier holen wir die Links aus der CSV
+cpu_link = cpu_row['link']
+gpu_link = gpu_row['link']
+
+# Berechnung
 res_factor = {"1080p": 0.8, "1440p": 1.0, "4K": 1.5}
 target_cpu = (gpu_score / res_factor[resolution]) * 0.6
 
 st.divider()
 
+# Anzeige mit Buttons
 col1, col2 = st.columns(2)
-col1.metric("CPU Leistung", cpu_score)
-col2.metric("GPU Leistung", gpu_score)
+
+with col1:
+    st.metric("CPU Leistung", cpu_score)
+    st.write(f"**{selected_cpu}**")
+    # Der Affiliate Button für die CPU
+    st.link_button(f"🛒 {selected_cpu} kaufen", cpu_link)
+
+with col2:
+    st.metric("GPU Leistung", gpu_score)
+    st.write(f"**{selected_gpu}**")
+    # Der Affiliate Button für die GPU
+    st.link_button(f"🛒 {selected_gpu} kaufen", gpu_link)
+
+st.divider()
 
 if cpu_score < target_cpu:
     st.error(f"⚠️ CPU Bottleneck! Deine CPU bremst in {resolution}.")
