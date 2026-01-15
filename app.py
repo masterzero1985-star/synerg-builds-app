@@ -70,16 +70,19 @@ except IndexError:
 res_factor = {"1080p": 0.8, "1440p": 1.0, "4K": 1.5}
 target_cpu = (gpu_row['score'] / res_factor[resolution]) * 0.6
 
-# --- ANZEIGE DER KOMPONENTEN ---
+# --- ANZEIGE DER KOMPONENTEN (Diagnose-Modus) ---
 col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("Prozessor")
-    # Bild anzeigen (wenn vorhanden, sonst Platzhalter)
-    if pd.notna(cpu_row.get('bild_url')):
+    # Wir testen: Was steht wirklich im Link?
+    st.caption(f"Debug-Link: {cpu_row.get('bild_url')}") 
+    
+    # Versuch 1: Das Bild anzeigen
+    try:
         st.image(cpu_row['bild_url'], width=250)
-    else:
-        st.write("🖼️ Kein Bild")
+    except:
+        st.error("Bild konnte nicht geladen werden.")
         
     st.markdown(f"**{selected_cpu}**")
     st.metric("Benchmark Score", f"{int(cpu_row['score'])}")
@@ -87,10 +90,12 @@ with col1:
 
 with col2:
     st.subheader("Grafikkarte")
-    if pd.notna(gpu_row.get('bild_url')):
+    st.caption(f"Debug-Link: {gpu_row.get('bild_url')}")
+    
+    try:
         st.image(gpu_row['bild_url'], width=250)
-    else:
-        st.write("🖼️ Kein Bild")
+    except:
+        st.error("Bild konnte nicht geladen werden.")
         
     st.markdown(f"**{selected_gpu}**")
     st.metric("Benchmark Score", f"{int(gpu_row['score'])}")
