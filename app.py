@@ -64,7 +64,7 @@ with col1:
     # Der Trick: Wir nutzen Markdown, damit der Browser das Bild lädt
     img_link = cpu_row.get('bild_url', '')
     if img_link and str(img_link).startswith('http'):
-        st.markdown(f'<img src="{img_link}" width="250" style="border-radius: 10px;">', unsafe_allow_html=True)
+        st.markdown(f'<img src="{img_link}" width="250" style="border-radius: 10px;" referrerpolicy="no-referrer">', unsafe_allow_html=True)
     else:
         st.write("🖼️ Kein Bild")
         
@@ -76,7 +76,7 @@ with col2:
     st.subheader("Grafikkarte")
     img_link = gpu_row.get('bild_url', '')
     if img_link and str(img_link).startswith('http'):
-        st.markdown(f'<img src="{img_link}" width="250" style="border-radius: 10px;">', unsafe_allow_html=True)
+        st.markdown(f'<img src="{img_link}" width="250" style="border-radius: 10px;" referrerpolicy="no-referrer">', unsafe_allow_html=True)
     else:
         st.write("🖼️ Kein Bild")
         
