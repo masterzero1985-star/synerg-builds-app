@@ -4,26 +4,32 @@ import pandas as pd
 # 1. KONFIGURATION
 st.set_page_config(page_title="SynerG Builds", page_icon="⚡", layout="wide")
 
-# 2. DATEN LADEN
+# 2. DATEN LADEN & REINIGEN
 @st.cache_data
 def load_data():
     try:
-        # csv laden
-        df = pd.read_csv("hardware_data.csv", sep=",")
+        # Wir lesen alles als Text (dtype=str), damit keine Nullen entstehen
+        df = pd.read_csv("hardware_data.csv", sep=",", dtype=str)
         
-        # Daten bereinigen (Zahlen erzwingen)
+        # --- REINIGUNG ---
+        # Wir entfernen alle Leerzeichen bei den Links (der wichtigste Schritt!)
+        if 'bild_url' in df.columns:
+            df['bild_url'] = df['bild_url'].str.strip()
+        if 'link' in df.columns:
+            df['link'] = df['link'].str.strip()
+            
+        # Zahlen wieder zu Zahlen machen
         df['score'] = pd.to_numeric(df['score'], errors='coerce').fillna(0)
         df['preis'] = pd.to_numeric(df['preis'], errors='coerce').fillna(0)
-        df.columns = df.columns.str.strip()
         
         return df
-    except Exception:
+    except Exception as e:
         return None
 
 df = load_data()
 
 if df is None:
-    st.error("Datenbank-Fehler.")
+    st.error("Fehler beim Laden der Datenbank.")
     st.stop()
 
 cpus = df[df['typ'] == 'cpu']
@@ -34,10 +40,8 @@ with st.sidebar:
     st.header("⚙️ Setup")
     selected_cpu = st.selectbox("Prozessor (CPU)", cpus['modell'].sort_values())
     selected_gpu = st.selectbox("Grafikkarte (GPU)", gpus['modell'].sort_values())
-    
     st.write("---")
     resolution = st.select_slider("Auflösung", options=["1080p", "1440p", "4K"], value="1440p")
-    st.caption("SynerG Builds v1.1")
 
 # 4. HAUPTBEREICH
 st.title("⚡ SynerG Builds")
@@ -45,50 +49,46 @@ st.write("Checke deine Hardware auf Bottlenecks.")
 st.divider()
 
 # Daten holen
-try:
-    cpu_row = cpus[cpus['modell'] == selected_cpu].iloc[0]
-    gpu_row = gpus[gpus['modell'] == selected_gpu].iloc[0]
-except IndexError:
-    st.error("Modell nicht gefunden.")
-    st.stop()
+cpu_row = cpus[cpus['modell'] == selected_cpu].iloc[0]
+gpu_row = gpus[gpus['modell'] == selected_gpu].iloc[0]
 
 # Berechnung
 res_factor = {"1080p": 0.8, "1440p": 1.0, "4K": 1.5}
 target_cpu = (gpu_row['score'] / res_factor[resolution]) * 0.6
 
-# --- ANZEIGE DER KOMPONENTEN (Browser-Rendering) ---
+# --- ANZEIGE FUNKTION ---
+def show_component(col, title, row):
+    with col:
+        st.subheader(title)
+        
+        # Bild-Logik: Robust und sicher
+        img_url = str(row.get('bild_url', ''))
+        
+        if img_url.lower().startswith('http'):
+            try:
+                # Wir nutzen wieder den Standard-Befehl, da die Links jetzt sauber sind
+                st.image(img_url, width=250)
+            except:
+                st.warning("Bild konnte nicht geladen werden.")
+        else:
+            st.info("Kein Bild verfügbar")
+            
+        st.markdown(f"**{row['modell']}**")
+        st.metric("Benchmark Score", f"{int(row['score'])}")
+        st.link_button(f"🛒 Kaufen ({row['preis']}€)", row['link'])
+
+# Spalten erzeugen
 col1, col2 = st.columns(2)
 
-with col1:
-    st.subheader("Prozessor")
-    # Der Trick: Wir nutzen Markdown, damit der Browser das Bild lädt
-    img_link = cpu_row.get('bild_url', '')
-    if img_link and str(img_link).startswith('http'):
-        st.markdown(f'<img src="{img_link}" width="250" style="border-radius: 10px;" referrerpolicy="no-referrer">', unsafe_allow_html=True)
-    else:
-        st.write("🖼️ Kein Bild")
-        
-    st.markdown(f"**{selected_cpu}**")
-    st.metric("Benchmark Score", f"{int(cpu_row['score'])}")
-    st.link_button(f"🛒 Kaufen ({cpu_row['preis']}€)", cpu_row['link'])
-
-with col2:
-    st.subheader("Grafikkarte")
-    img_link = gpu_row.get('bild_url', '')
-    if img_link and str(img_link).startswith('http'):
-        st.markdown(f'<img src="{img_link}" width="250" style="border-radius: 10px;" referrerpolicy="no-referrer">', unsafe_allow_html=True)
-    else:
-        st.write("🖼️ Kein Bild")
-        
-    st.markdown(f"**{selected_gpu}**")
-    st.metric("Benchmark Score", f"{int(gpu_row['score'])}")
-    st.link_button(f"🛒 Kaufen ({gpu_row['preis']}€)", gpu_row['link'])
+# Komponenten anzeigen
+show_component(col1, "Prozessor", cpu_row)
+show_component(col2, "Grafikkarte", gpu_row)
 
 st.divider()
 
 # --- ERGEBNIS ---
 if cpu_row['score'] < target_cpu * 0.9:
-    st.error(f"⚠️ **CPU Bottleneck!** \n\nDeine CPU ist zu schwach für die {selected_gpu} in {resolution}.")
+    st.error(f"⚠️ **CPU Bottleneck!** \n\nDeine CPU ist zu schwach für die {selected_gpu}.")
 elif cpu_row['score'] > target_cpu * 2.5:
     st.warning("⚠️ **GPU Bottleneck!** \n\nDeine CPU ist sehr stark, aber die Grafikkarte kommt nicht hinterher.")
 else:
