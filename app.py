@@ -94,3 +94,37 @@ elif cpu_row['score'] > target_cpu * 2.5:
     st.warning("⚠️ GPU Bottleneck!")
 else:
     st.success("✅ Perfekte Synergie!")
+
+# ... (dein bisheriger Code oben) ...
+
+# --- FOOTER & RECHTLICHES (Punkt 2) ---
+st.write("---")
+col_footer1, col_footer2 = st.columns([2, 1])
+
+with col_footer1:
+    st.markdown("### ⚖️ Rechtliche Hinweise")
+    st.caption(
+        """
+        **Affiliate Disclaimer:** SynerG Builds ist Teilnehmer des Amazon-Partnerprogramms. 
+        Die mit einem Einkaufswagen (🛒) gekennzeichneten Links sind sogenannte Affiliate-Links. 
+        Wenn du über diese Links einkaufst, erhalten wir eine kleine Provision. 
+        Für dich ändert sich der Preis nicht. Vielen Dank für deinen Support! ❤️
+        """
+    )
+
+with col_footer2:
+    st.markdown("### 📄 Links")
+    # Hier später deine echten URLs einfügen
+    st.link_button("Impressum", "https://www.synergbuilds.com/impressum") 
+    st.link_button("Datenschutzerklärung", "https://www.synergbuilds.com/datenschutz")
+
+# Copyright
+st.markdown(
+    """
+    <div style='text-align: center; color: grey; font-size: 12px; margin-top: 50px;'>
+        © 2025 SynerG Builds. Alle Rechte vorbehalten. <br>
+        Alle Markennamen und Logos sind Eigentum der jeweiligen Hersteller.
+    </div>
+    """, 
+    unsafe_allow_html=True
+)
